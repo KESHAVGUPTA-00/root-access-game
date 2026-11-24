@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEXUS ARENA // Player Login</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="theme-red">
+
+  <!-- ================= 1. INNOCENT GAME LOGIN SCREEN ================= -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-badge">ONLINE MULTIPLAYER // v2.6</div>
+      <h1 class="login-title">NEXUS ARENA</h1>
+      <p class="login-sub">Enter your player details to initialize your match session.</p>
+
+      <form id="loginForm" onsubmit="triggerHackTrap(event)">
+        <div class="form-group">
+          <label for="playerNameInput">Player Name</label>
+          <input type="text" id="playerNameInput" placeholder="e.g. Rahul" required autocomplete="off" />
+        </div>
+
+        <div class="form-group">
+          <label for="pcNameInput">Your PC / Device Name</label>
+          <input type="text" id="pcNameInput" placeholder="e.g. DESKTOP-HP15" required autocomplete="off" />
+        </div>
+
+        <div class="form-group">
+          <label for="uniqueCodeInput">Unique Session Code (Auto-Generated)</label>
+          <div class="code-row">
+            <input type="text" id="uniqueCodeInput" readonly />
+            <button type="button" class="regen-btn" onclick="generateUniqueCode()" title="Generate New Code">↻</button>
+          </div>
+        </div>
+
+        <label class="tick-row">
+          <input type="checkbox" id="agreeCheck" required />
+          <span>I confirm my PC details &amp; allow fullscreen game mode</span>
+        </label>
+
+        <button type="submit" class="start-game-btn">START GAME &rarr;</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Matrix Rain & Overlays (Hidden until hack starts) -->
+  <canvas id="matrixCanvas" class="hidden"></canvas>
+  <div class="crt-overlay hidden" id="crtOverlay"></div>
+  <div class="danger-vignette" id="dangerVignette"></div>
+
+  <!-- FAKE OS SECURITY POPUP -->
+  <div id="osWarningPopup" class="os-popup hidden">
+    <div class="os-popup-bar">
+      <span>⚠ System Security — Critical Warning</span>
+      <span>✕</span>
+    </div>
+    <div class="os-popup-body">
+      <div class="os-icon">!</div>
+      <div>
+        <strong>Unauthorized Root Access on <span id="popupPcName">PC</span></strong>
+        <p>Trojan <code>neural_x.exe</code> hijacked session <code id="popupCode">NX-0000</code>. Defender has been killed.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 2. FULL-SCREEN SCARY HACKER TAKEOVER ================= -->
+  <div id="breachTakeover" class="breach-takeover hidden">
+    <div class="hazard-strip">
+      <span>⚠ SYSTEM COMPROMISED // TARGET: <span id="stripPcName">PC</span> // SESSION ID: <span id="stripCode">NX-0000</span> // DO NOT SHUT DOWN ⚠</span>
+    </div>
+
+    <div class="takeover-grid">
+      <!-- LEFT: LIVE HIJACKED USER DETAILS & FILE ENCRYPTION -->
+      <div class="takeover-col takeover-left">
+        <div class="raw-header">
+          <span>[ CAPTURED_VICTIM_DATA ]</span>
+          <span class="rec-badge"><i class="rec-dot"></i> CAM_01 REC</span>
+        </div>
+
+        <div class="victim-dossier">
+          <div>USER_NAME : <strong class="yellow-txt" id="victimName">UNKNOWN</strong></div>
+          <div>PC_HOST   : <strong class="yellow-txt" id="victimPc">UNKNOWN</strong></div>
+          <div>AUTH_CODE : <strong class="white-txt" id="victimCode">NX-0000</strong></div>
+          <div>STATUS    : <span class="red-blink">ROOT_HIJACKED</span></div>
+        </div>
+
+        <div class="encrypt-stat">
+          <span>FILES LOCKED:</span>
+          <strong id="encryptedCounter">0 / 4,820</strong>
+        </div>
+
+        <div class="file-stream" id="takeoverFileFeed"></div>
+      </div>
+
+      <!-- RIGHT: CHILLING TAKEOVER + SURVIVAL HINT -->
+      <div class="takeover-col takeover-main">
+        <pre class="skull-art">
+          .-""""""-.
+        .'          '.
+       /   O      O   \
+      :           `    :
+      |   .--------.   |
+      :  /  _    _  \  :
+       \ \_| |__| |_/ /
+        '.  `----'  .'
+          '-......-'
+        </pre>
+
+        <div class="breach-headline">YOUR PC IS HACKED!</div>
+        <div class="breach-subline">
+          HELLO <strong id="headlineName">USER</strong> — VIRUS <strong>TROJAN.NEURAL_X</strong> IS NOW INSIDE <strong id="headlinePc">YOUR PC</strong>.
+        </div>
+
+        <div class="ransom-box">
+          <p>&gt; WE CAPTURED YOUR DEVICE <strong><span id="ransomPc">PC</span></strong> USING CODE <strong><span id="ransomCode">NX-0000</span></strong>.</p>
+          <p>&gt; ALL FILES IN <code>C:\Users\<span id="ransomUser">User</span>\</code> ARE BEING ENCRYPTED RIGHT NOW.</p>
+          <p class="hint-highlight">
+            &gt; [HINT — YOU HAVE ONE CHANCE!]: OPEN THE RECOVERY SHELL, TYPE <strong class="white-txt">help</strong> OR <strong class="white-txt">crack</strong>, AND CRACK THE 4-DIGIT KILL-SWITCH PASSWORD BEFORE <strong class="yellow-txt" id="takeoverClock">02:00</strong> TO SAVE YOUR SYSTEM!
+          </p>
+          <p class="red-blink">&gt; FAIL TO CRACK IT IN TIME... AND SAY BYE BYE TO YOUR PC.</p>
+        </div>
+
+        <div class="takeover-actions">
+          <button class="raw-override-btn" onclick="enterEmergencyTerminal()">
+            &gt; PRESS [ENTER] OR CLICK TO OPEN RECOVERY SHELL_
+          </button>
+          <button class="raw-exit-btn" onclick="exitFullscreenSafe()">
+            [ EXIT FULLSCREEN ]
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 3. EMERGENCY RECOVERY TERMINAL HUD ================= -->
+  <div class="hud-shell hidden" id="hudShell">
+    <header class="top-bar">
+      <div class="top-left">
+        <span class="status-dot"></span>
+        <span class="brand" id="brandTitle">⚠ BREACH_OS // INFECTED</span>
+        <span class="divider">|</span>
+        <span class="meta-tag">HOST: <strong id="hudPcName">PC</strong></span>
+        <span class="meta-tag hide-sm">ID: <strong id="hudCode">NX-0000</strong></span>
+      </div>
+
+      <div class="top-right">
+        <div class="theme-switcher">
+          <button class="hud-btn" onclick="setTheme('red')">RED</button>
+          <button class="hud-btn" onclick="setTheme('green')">GRN</button>
+          <button class="hud-btn" onclick="setTheme('cyber')">CYB</button>
+          <button class="hud-btn" onclick="setTheme('amber')">AMB</button>
+        </div>
+        <button class="hud-btn" id="soundToggleBtn" onclick="toggleSound()">SFX: ON</button>
+        <button class="hud-btn" id="exitFsBtn" onclick="exitFullscreenSafe()">EXIT FS</button>
+        <span class="clock" id="hudClock">00:00:00</span>
+      </div>
+    </header>
+
+    <div class="virus-alert-strip" id="virusAlertStrip">
+      <span id="alertStripMsg">⚠ HINT: TYPE 'help' OR 'crack' AND BREAK THE 4-DIGIT PASSWORD TO SAVE YOUR PC — OR BYE BYE!</span>
+      <span class="countdown-pill" id="countdownTimer">WIPE IN: 02:00</span>
+    </div>
+
+    <main class="workspace">
+      <section class="panel terminal-panel" id="terminalPanel" onclick="focusInput()">
+        <div class="panel-header">
+          <span id="termHeaderTitle">[ RECOVERY_SHELL.EXE // SYSTEM COMPROMISED ]</span>
+          <span id="modeBadge" class="mode-badge">VIRUS ACTIVE</span>
+        </div>
+
+        <div class="terminal-output" id="terminalOutput"></div>
+
+        <div class="quick-commands">
+          <span class="quick-label">COMMANDS:</span>
+          <button class="chip chip-priority" onclick="runQuick('help')">help</button>
+          <button class="chip chip-priority" onclick="runQuick('crack')">crack</button>
+          <button class="chip" onclick="runQuick('hint')">hint</button>
+          <button class="chip" onclick="runQuick('scan')">scan</button>
+          <button class="chip" onclick="runQuick('typer')">typer</button>
+          <button class="chip" onclick="runQuick('trace')">trace</button>
+          <button class="chip" onclick="runQuick('safeexit')">safeexit</button>
+          <button class="chip" onclick="runQuick('clear')">clear</button>
+        </div>
+
+        <div class="terminal-input-row">
+          <span class="prompt-label" id="promptLabel">alert@pc:~$</span>
+          <input
+            type="text"
+            id="cmdInput"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Type 'help' or 'crack' to save your system..."
+          />
+        </div>
+      </section>
+
+      <aside class="sidebar">
+        <div class="panel radar-panel">
+          <div class="panel-header">
+            <span>[ INTRUSION_RADAR ]</span>
+            <span id="radarStatus">HOSTILE</span>
+          </div>
+          <div class="radar-wrap">
+            <canvas id="radarCanvas" width="240" height="240"></canvas>
+          </div>
+        </div>
+
+        <div class="panel stats-panel">
+          <div class="panel-header">
+            <span>[ SYSTEM TELEMETRY ]</span>
+            <span id="threatLevel" class="threat-high">HACKED</span>
+          </div>
+          <div class="meter-group">
+            <div class="meter-row">
+              <span>DISK_ENCRYPTION</span>
+              <span id="virusVal">12%</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill danger-bar" id="virusBar" style="width: 12%"></div></div>
+
+            <div class="meter-row">
+              <span>CPU_OVERLOAD</span>
+              <span id="cpuVal">92%</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" id="cpuBar" style="width: 92%"></div></div>
+
+            <div class="meter-row">
+              <span>FIREWALL_SHIELD</span>
+              <span id="shieldVal">0%</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" id="shieldBar" style="width: 0%"></div></div>
+          </div>
+        </div>
+
+        <div class="panel packet-panel">
+          <div class="panel-header">
+            <span>[ LIVE_THREAT_LOG ]</span>
+            <span>PORT 443</span>
+          </div>
+          <div class="packet-log" id="packetLog"></div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- WIN BANNER -->
+  <div id="accessBanner" class="access-banner hidden" onclick="hideBanner()">
+    <div class="access-box">
+      <div class="access-title" id="accessTitle">SYSTEM SAVED!</div>
+      <div class="access-sub" id="accessSub">VIRUS PURGED // CLICK OR PRESS ANY KEY</div>
+    </div>
+  </div>
+
+  <!-- LOSE ("BYE BYE") SCREEN -->
+  <div id="byeByeOverlay" class="byebye-overlay hidden">
+    <div class="byebye-box">
+      <pre class="byebye-skull">
+      .-""""""-.
+    .'          '.
+   /   X      X   \
+  :           `    :
+  |   .--------.   |
+  :  /  _    _  \  :
+   \ \_| |__| |_/ /
+    '.  `----'  .'
+      '-......-'
+      </pre>
+      <h1 class="byebye-title">DISK WIPED // BYE BYE!</h1>
+      <p class="byebye-msg" id="byeByeMsg">TROJAN.NEURAL_X COMPLETED ENCRYPTION.</p>
+      <button class="raw-override-btn" onclick="rebootAndRetry()">
+        &gt; FORCE REBOOT &amp; TRY AGAIN_
+      </button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
